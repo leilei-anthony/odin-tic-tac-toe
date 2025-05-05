@@ -19,10 +19,17 @@ const Gameboard = function() {
             }
         }
 
+        function displayBoard() {
+            for (let i = 0; i < board.length; i++) {
+                document.getElementById(`cell${i}`).innerHTML = board[i];
+            }          
+        }
+
         return {
             placeToken,
             getBoard,
-            resetBoard
+            resetBoard,
+            displayBoard
         }
 }
 
@@ -154,9 +161,7 @@ const GameControl = function() {
     cw.checkRow(gb.getBoard(), p1.token);
     console.log(cw.getResult());
 
-
-
-
+    gb.displayBoard();
 }
 
 GameControl();
