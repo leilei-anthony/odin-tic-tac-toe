@@ -1,9 +1,12 @@
 const Gameboard = function() {
     const board = new Array(9).fill('');
 
+        const title = document.getElementById('title');
+
         function placeToken(index, token) {
-            if(board[index] === '') {
+            if(board[index] === '' && title.innerHTML === 'tic-tac-toe') {
                 board[index] = token;
+                displayBoard();
                 return true;
             }
             return false;
@@ -14,7 +17,7 @@ const Gameboard = function() {
         }
 
         function resetBoard() {
-            for (let i = 0; i < boardSize; i++) {
+            for (let i = 0; i < 9; i++) {
                 board[i] = '';
             }
         }
@@ -24,6 +27,17 @@ const Gameboard = function() {
                 document.getElementById(`cell${i}`).innerHTML = board[i];
             }          
         }
+
+        const btnReset = document.getElementById('btnReset');
+        btnReset.addEventListener('click', function() {
+            resetBoard();
+            title.innerHTML = 'tic-tac-toe'
+            displayBoard();
+        })
+
+        for (let i = 0; i < board.length; i++) {
+            document.getElementById(`cell${i}`).innerHTML = board[i];
+        }  
 
         return {
             placeToken,
@@ -65,58 +79,36 @@ const Player = function() {
 }
 
 const CheckWin = function() {
-    let result = {};
 
     const checkRow = function(board, token) {
-        result = {};
-
-        if((board[0] === token &&
-            board[1] === token &&
-            board[2] === token) ||
-           (board[3] === token &&
-            board[4] === token &&
-            board[5] === token) ||
-           (board[6] === token &&
-            board[7] === token &&
-            board[8] === token)
-        ) {
-            result = {winner: token};
-        }
+        return (
+            (board[0] === token && board[1] === token && board[2] === token) ||
+            (board[3] === token && board[4] === token && board[5] === token) ||
+            (board[6] === token && board[7] === token && board[8] === token)
+        );
     }
-
+    
     const checkColumn = function(board, token) {
-        result = {};
-
-        if((board[0] === token &&
-            board[3] === token &&
-            board[6] === token) ||
-           (board[1] === token &&
-            board[4] === token &&
-            board[7] === token) ||
-           (board[2] === token &&
-            board[5] === token &&
-            board[8] === token)
-        ) {
-            result = {winner: token};
-        }
+        return (
+            (board[0] === token && board[3] === token && board[6] === token) ||
+            (board[1] === token && board[4] === token && board[7] === token) ||
+            (board[2] === token && board[5] === token && board[8] === token)
+        );
     }
-
+    
     const checkDiagonal = function(board, token) {
-        result = {};
-
-        if((board[0] === token &&
-            board[4] === token &&
-            board[8] === token) ||
-           (board[2] === token &&
-            board[4] === token &&
-            board[6] === token)
-        ) {
-            result = {winner: token};
-        }
+        return (
+            (board[0] === token && board[4] === token && board[8] === token) ||
+            (board[2] === token && board[4] === token && board[6] === token)
+        );
     }
 
-    const getResult = function() {
-        return result;
+    const getResult = function(board, token) {
+        return (
+            checkRow(board, token) ||
+            checkColumn(board, token) ||
+            checkDiagonal(board, token)
+        );
     }
 
     return {
@@ -134,32 +126,31 @@ const GameControl = function() {
 
     pl.addPlayer('p1', 'X');
     pl.addPlayer('p2', 'O');
-
     const p1 = pl.getPlayers(0);
-    const p2 = pl.getPlayers(1);
+    const p2 = pl.getPlayers(1); 
 
-    console.log(gb.getBoard());
+    let currentPlayer = p1;
 
-    console.log(p1);
-    console.log(p2);
+    const cellArray = Array.from(document.querySelectorAll('.cell'));
+        cellArray.forEach(cell => {
+            cell.addEventListener('click', () => {
 
-    gb.placeToken(0, p1.token)
-    console.log(gb.getBoard());
+                const str = cell.id;
+                const match = str.match(/^([a-zA-Z]+)(\d+)$/);
+                const index = match[2];
 
-    gb.placeToken(3, p2.token)
-    console.log(gb.getBoard());
+                gb.placeToken(index, currentPlayer.token);
 
-    gb.placeToken(1, p1.token)
-    console.log(gb.getBoard());
+                console.log(gb.getBoard());
 
-    gb.placeToken(4, p2.token)
-    console.log(gb.getBoard());
+                if (cw.getResult(gb.getBoard(), currentPlayer.token)) {
+                    const title = document.getElementById('title');
+                    title.innerHTML = currentPlayer.token + " wins!";
+                }
 
-    gb.placeToken(2, p1.token)
-    console.log(gb.getBoard());
-
-    cw.checkRow(gb.getBoard(), p1.token);
-    console.log(cw.getResult());
+                currentPlayer = currentPlayer === p1 ? p2 : p1;
+            })
+        })
 
     gb.displayBoard();
 }
